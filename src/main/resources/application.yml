@@ -1,0 +1,178 @@
+spring:
+  application:
+    name: livestream_apd
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/livestream_app_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8&useUnicode=true
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+        generate_statistics: false
+        jdbc:
+          batch_size: 20
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+  
+  flyway:
+    enabled: false
+
+# VNPay Configuration
+vnpay:
+  sandbox:
+    merchant-id: ${VNPAY_MERCHANT_ID:9HZKBNNN}
+    secret-key: ${VNPAY_SECRET_KEY:8HGHV2MT8QI5NLICKG28HOBLJ0AATIE6}
+    return-url: ${VNPAY_RETURN_URL:http://192.168.1.4:8080/api/v1/payments/vnpay/callback}
+    notify-url: ${VNPAY_NOTIFY_URL:http://192.168.1.4:8080/api/v1/payments/vnpay/callback}
+
+# TRTC Configuration
+trtc:
+  app-id: ${TRTC_APP_ID:20027606}
+  app-secret: ${TRTC_APP_SECRET:42ba4433a3fdf213ccb19a520de40eff567556cd58108bc3b9f7bf3a7298e07e}
+  expire-time: ${TRTC_EXPIRE_TIME:86400}  # 24 hours in seconds
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:hungndgbh210504@fpt.edu.vn}
+    password: ${MAIL_PASSWORD:noddkintjcmhnbjn}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+    jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
+
+  error:
+    include-stacktrace: never
+    include-message: always
+
+# Application specific configurations
+app:
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    access-token-expiration: 86400000  # 24 hours
+    refresh-token-expiration: 604800000 # 7 days
+    issuer: live_hungbao
+
+  otp:
+    expiration: 300000  # 5 minutes
+    length: 6
+    max-attempts: 3
+    resend-cooldown: 60000  # 1 minute
+
+  email:
+    from: ${EMAIL_FROM:noreply@livestreamapp.com}
+    from-name: ${EMAIL_FROM_NAME:Livestream App}
+    verification-url: ${VERIFICATION_URL:http://localhost:3000/verify-email}
+    reset-password-url: ${RESET_PASSWORD_URL:http://localhost:3000/reset-password}
+
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:8080
+      - https://livestream_apd.com
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+
+  rate-limiting:
+    enabled: true
+    requests-per-minute: 60
+    burst-capacity: 100
+
+# Logging configuration
+logging:
+  level:
+    com.java.live_hungbao: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Management and monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+    db:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+
+# Swagger/OpenAPI configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  packages-to-scan: com.java.livestream_apd.presentation.controller
